@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/kennyhyun/nodejs-s3-thumbnail-generator/issues"
   },
-  "homepage": "https://github.com/kennyhyun/nodejs-s3-thumbnail-generator#readme"
+  "homepage": "https://github.com/kennyhyun/nodejs-s3-thumbnail-generator#readme",
+  "devDependencies": {
+    "serverless": "^2.11.1",
+    "serverless-offline": "^6.8.0"
+  }
 }
