@@ -63,22 +63,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: node_modules/.bin/nodemon dist/server.js
     expose:
-      - 4000
+      - 3000
     volumes:
-      - .:/app
-      - /app/node_modules
-      - ./bucket:/data
-    environment:
-      - NODE_ENV=${NODE_ENV:-stage}
+      - ./thumbnail-generator/serverless.yml:/app/serverless.yml
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/generate`)"
-      - "traefik.http.routers.backend.entrypoints=https"
-      - "traefik.http.routers.backend.tls=true"
-      - "traefik.http.routers.backend.service=backend"
+      - "traefik.http.services.serverless.loadbalancer.server.port=3000"
+      - "traefik.http.routers.serverless.rule=PathPrefix(`/generate`)"
+      - "traefik.http.routers.serverless.entrypoints=https"
+      - "traefik.http.routers.serverless.tls=true"
+      - "traefik.http.routers.serverless.service=serverless"
     depends_on:
       - reverse-proxy
     networks:

@@ -63,6 +63,7 @@ custom:
   serverless-offline:
     resourceRoutes: true
     noPrependStageInUrl: true
+    host: 0.0.0.0
 
 functions:
   generate:
