@@ -55,34 +55,34 @@ const getSourceStream = ({ location }) => {
 };
 
 const generateThumbnail = async ({ width, height, location }) => {
-    const transform = sharp()
-      .rotate()
-      .resize({ width, height })
-      .jpeg({ quality: 80 });
-    const inputStream = getSourceStream({ location });
-    await s3Client
-      .createBucket({ Bucket: TargetBucketName, CreateBucketConfiguration: { LocationConstraint: Region } })
-      .promise()
-      .catch(e => {
-        if (e.code !== 'BucketAlreadyOwnedByYou') throw e;
-      });
-    const { thumbKey, stream: outputStream, promise } = getTargetStream({ width, height, location });
-    const pipe = inputStream.pipe(transform).pipe(outputStream);
-    return Promise.all([
-      new Promise((resolve, reject) => {
-        inputStream.on('finish', () => resolve(thumbKey));
-        pipe.on('close', () => resolve(thumbKey));
-        pipe.on('error', err => reject(err));
-        inputStream.on('error', err => reject(err));
-        inputStream.on('close', () => resolve(thumbKey));
-        outputStream.on('error', err => reject(err));
-        /*
+  const transform = sharp()
+    .rotate()
+    .resize({ width, height })
+    .jpeg({ quality: 80 });
+  const inputStream = getSourceStream({ location });
+  await s3Client
+    .createBucket({ Bucket: TargetBucketName, CreateBucketConfiguration: { LocationConstraint: Region } })
+    .promise()
+    .catch(e => {
+      if (e.code !== 'BucketAlreadyOwnedByYou') throw e;
+    });
+  const { thumbKey, stream: outputStream, promise } = getTargetStream({ width, height, location });
+  const pipe = inputStream.pipe(transform).pipe(outputStream);
+  return Promise.all([
+    new Promise((resolve, reject) => {
+      inputStream.on('finish', () => resolve(thumbKey));
+      pipe.on('close', () => resolve(thumbKey));
+      pipe.on('error', err => reject(err));
+      inputStream.on('error', err => reject(err));
+      inputStream.on('close', () => resolve(thumbKey));
+      outputStream.on('error', err => reject(err));
+      /*
     outputStream.on('error', err => reject(err));
     outputStream.on('close', () => resolve(thumbKey));
 */
-      }),
-      promise,
-    ]);
+    }),
+    promise,
+  ]);
 };
 
 const Prefix = '/thumbnails';
