@@ -26,6 +26,7 @@
     "serverless-offline": "^6.8.0"
   },
   "dependencies": {
+    "aws-sdk": "^2.797.0",
     "sharp": "^0.26.3"
   }
 }
