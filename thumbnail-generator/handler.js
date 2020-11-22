@@ -40,46 +40,54 @@ const hello = async event => {
 
 const sourcePrefix = '/images';
 const getDimensionKey = ({ width, height }) => `${width || ''}x${height || ''}`;
-const getTargetStream = ({ width, height, location }) => {
+
+const getTargetStream = ({ context, width, height, location }) => {
   const dimensionKey = getDimensionKey({ width, height });
   const thumbKey = `${dimensionKey}/${location}`;
-  const stream = new Stream.PassThrough();
+  const stream = new Stream.PassThrough().on('error', err => context.reject(err));
   return {
     stream,
     thumbKey,
     promise: s3Client.upload({ ...targetS3Config, Key: thumbKey, Body: stream }).promise(),
   };
 };
-const getSourceStream = ({ location }) => {
-  return s3Client.getObject({ ...sourceS3Config, Key: location }).createReadStream();
-};
 
+const getSourceStream = ({ location, context }) =>
+  s3Client
+    .getObject({ ...sourceS3Config, Key: location }, (err, data) => {
+      if (err) {
+        context.reject(err);
+      }
+    })
+    .createReadStream()
+    .on('error', e => context.reject(e));
+
+const createTargetBucket = context => {
+  // create bucket async
+  s3Client.createBucket({ Bucket: TargetBucketName, CreateBucketConfiguration: { LocationConstraint: Region } }, e => {
+    if (e && e.code !== 'BucketAlreadyOwnedByYou') {
+      context.reject(new Error(`Failed to create the bucket: ${e.message}`));
+    }
+  });
+};
 const generateThumbnail = async ({ width, height, location }) => {
+  const context = {};
+  const promise = new Promise((resolve, reject) => {
+    context.resolve = resolve;
+    context.reject = reject;
+  });
+  createTargetBucket(context);
+  const inputStream = getSourceStream({ context, location });
   const transform = sharp()
     .rotate()
     .resize({ width, height })
     .jpeg({ quality: 80 });
-  const inputStream = getSourceStream({ location });
-  await s3Client
-    .createBucket({ Bucket: TargetBucketName, CreateBucketConfiguration: { LocationConstraint: Region } })
-    .promise()
-    .catch(e => {
-      if (e.code !== 'BucketAlreadyOwnedByYou') throw e;
-    });
-  const { thumbKey, stream: outputStream, promise } = getTargetStream({ width, height, location });
-  const pipe = inputStream.pipe(transform).pipe(outputStream);
-  return Promise.all([
+  const { thumbKey, stream: outputStream } = getTargetStream({ context, width, height, location });
+  inputStream.pipe(transform).pipe(outputStream);
+  return Promise.race([
     new Promise((resolve, reject) => {
-      inputStream.on('finish', () => resolve(thumbKey));
-      pipe.on('close', () => resolve(thumbKey));
-      pipe.on('error', err => reject(err));
-      inputStream.on('error', err => reject(err));
-      inputStream.on('close', () => resolve(thumbKey));
-      outputStream.on('error', err => reject(err));
-      /*
-    outputStream.on('error', err => reject(err));
-    outputStream.on('close', () => resolve(thumbKey));
-*/
+      inputStream.on('finish', () => context.resolve() && resolve(thumbKey));
+      inputStream.on('close', () => context.resolve() && resolve(thumbKey));
     }),
     promise,
   ]);
