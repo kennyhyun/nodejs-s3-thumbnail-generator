@@ -21,6 +21,7 @@ services:
     environment:
       - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
       - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
+      - MINIO_REGION_NAME=${AWS_DEFAULT_REGION}
     expose:
       - 9000
     ports:
@@ -66,7 +67,9 @@ services:
     expose:
       - 3000
     volumes:
-      - ./thumbnail-generator/serverless.yml:/app/serverless.yml
+      - ./thumbnail-generator/handler.js:/app/thumbnail-generator/handler.js
+      - ./serverless.yml:/app/serverless.yml
+      - .env.docker:/app/.env
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.serverless.loadbalancer.server.port=3000"
@@ -74,6 +77,12 @@ services:
       - "traefik.http.routers.serverless.entrypoints=https"
       - "traefik.http.routers.serverless.tls=true"
       - "traefik.http.routers.serverless.service=serverless"
+    command:
+      - yarn
+      - run
+      - nodemon
+      - node_modules/.bin/serverless
+      - offline
     depends_on:
       - reverse-proxy
     networks:

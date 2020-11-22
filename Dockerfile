@@ -14,8 +14,8 @@ WORKDIR /app
 COPY --from=builder /app/node_modules node_modules
 #COPY . /app
 
-COPY package.json /app
-COPY thumbnail-generator/serverless.yml /app
-COPY thumbnail-generator/handler.js /app
+COPY package.json /app/
+COPY serverless.yml /app/
+COPY thumbnail-generator/handler.js /app/thumbnail-generator/
 
 CMD [ "yarn", "run", "serverless", "offline" ]
