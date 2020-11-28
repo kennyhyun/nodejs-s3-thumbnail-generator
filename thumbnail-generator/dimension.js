@@ -18,7 +18,6 @@ const getTargetDimension = ({ sourceDimension: dimension, width, height }) => {
     console.warn(`cannot get the source dimension, assuming as a square image`);
     return { width: width || height, height: height || width };
   }
-  console.log('-=-=-=', typeof dimension.width, typeof dimension.height, typeof width, typeof height);
   if (width && height) {
     return { width, height };
   } else if (width) {
@@ -37,7 +36,6 @@ const getSourceDimension = async location => {
     const {
       Metadata: { width, height },
     } = obj;
-    console.log('============>>>>>', obj.Metadata);
     if (width && height) return { width: Number(width), height: Number(height) };
     const strm = s3Client
       .getObject({ ...sourceS3Config, Key: location }, (err, data) => {
@@ -48,11 +46,10 @@ const getSourceDimension = async location => {
       .createReadStream()
       .on('error', e => context.reject(e));
     const info = await Promise.race([probe(strm), promise]).catch(() => ({}));
-    console.log('==== probe', info);
     // TODO: update meta asyncronously
     return info;
   } catch (e) {
-    console.log('Error:', e.message, '!!!');
+    console.log('Error:', e.message);
     return {};
   }
 };
