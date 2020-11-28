@@ -1,9 +1,11 @@
 'use strict';
 const sharp = require('sharp');
 const path = require('path');
-const AWS = require('aws-sdk');
 const config = require('dotenv').config();
 const Stream = require('stream');
+
+const { getTargetDimension, getSourceDimension } = require('./dimension');
+const { s3Client } = require('./s3Client');
 
 const {
   SOURCE_BUCKET_NAME: SourceBucketName = 'images',
@@ -19,8 +21,6 @@ const sourceS3Config = {
 const targetS3Config = {
   Bucket: TargetBucketName,
 };
-
-const s3Client = new AWS.S3({ endpoint: S3_HOST, s3ForcePathStyle: true });
 
 const hello = async event => {
   return {
@@ -70,24 +70,26 @@ const createTargetBucket = context => {
     }
   });
 };
+
 const generateThumbnail = async ({ width, height, location }) => {
   const context = {};
   const promise = new Promise((resolve, reject) => {
-    context.resolve = resolve;
     context.reject = reject;
   });
+  const sourceDimension = await getSourceDimension(location);
+  const targetDimension = width && height ? { width, height } : getTargetDimension({ width, height, sourceDimension });
   createTargetBucket(context);
   const inputStream = getSourceStream({ context, location });
   const transform = sharp()
     .rotate()
-    .resize({ width, height })
+    .resize(targetDimension)
     .jpeg({ quality: 80 });
-  const { thumbKey, stream: outputStream } = getTargetStream({ context, width, height, location });
+  const { thumbKey, stream: outputStream } = getTargetStream({ context, ...targetDimension, location });
   inputStream.pipe(transform).pipe(outputStream);
   return Promise.race([
     new Promise((resolve, reject) => {
-      inputStream.on('finish', () => context.resolve() && resolve(thumbKey));
-      inputStream.on('close', () => context.resolve() && resolve(thumbKey));
+      inputStream.on('finish', () => resolve(thumbKey));
+      inputStream.on('close', () => resolve(thumbKey));
     }),
     promise,
   ]);
@@ -102,15 +104,16 @@ const generate = async event => {
     } = event;
     const [, width, height, location] = proxy.match(/^([0-9]+)?x([0-9]+)?\/(.*)$/) || [];
     if ((width || height) && location) {
-      await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
+      const key = await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
       return {
         statusCode: 302,
         headers: {
-          Location: `${Prefix}/${getDimensionKey({ width, height })}/${location}`,
+          Location: `${Prefix}/${key}`,
         },
       };
     }
   } catch (e) {
+    console.error(e);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: e.message }),

@@ -7,6 +7,16 @@ const mockS3 = () => {
           promise: jest.fn().mockResolvedValue(),
         };
       }),
+      headObject: jest.fn().mockImplementation(() => ({
+        promise: jest.fn().mockResolvedValue({
+          AcceptRanges: 'bytes',
+          LastModified: new Date('2020-11-15T12:28:49.000Z'),
+          ContentLength: 84995,
+          ETag: '"00000000000000000000000000000000-1"',
+          ContentType: 'image/jpeg',
+          Metadata: { width: '960', height: '540' },
+        }),
+      })),
       getObject: jest.fn().mockImplementation(() => ({
         createReadStream: jest.fn().mockImplementation(() => {
           const stream = {
@@ -64,6 +74,18 @@ describe('generate', () => {
       expect.objectContaining({
         statusCode: 302,
         headers: expect.objectContaining({ Location: '/thumbnails/32x32/image.jpg' }),
+      })
+    );
+  });
+  it('should return 302 for width only request', async () => {
+    mockS3();
+    const { generate } = await import('../handler');
+    const resp = await generate(event('32x/image.jpg'));
+    console.log(resp);
+    expect(resp).toEqual(
+      expect.objectContaining({
+        statusCode: 302,
+        headers: expect.objectContaining({ Location: '/thumbnails/32x18/image.jpg' }),
       })
     );
   });
