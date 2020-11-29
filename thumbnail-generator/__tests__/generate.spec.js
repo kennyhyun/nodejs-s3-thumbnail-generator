@@ -86,19 +86,19 @@ describe('generate', () => {
       })
     );
   });
-  it('should return 302 after generating the thumbnail', async () => {
+  it('should return 301 after generating the thumbnail', async () => {
     mockS3();
     const { generate } = await import('../handler');
     const resp = await generate(event('32x32/image.jpg'));
     console.log(resp);
     expect(resp).toEqual(
       expect.objectContaining({
-        statusCode: 302,
+        statusCode: 301,
         headers: expect.objectContaining({ Location: '/thumbnails/32x32/image.jpg' }),
       })
     );
   });
-  it('should return 307 with calculated size for width only requests', async () => {
+  it('should return 301 with calculated size for width only requests', async () => {
     mockS3();
     const { generate } = await import('../handler');
     const resp = await generate(event('32x/image.jpg'));
@@ -106,7 +106,7 @@ describe('generate', () => {
     expect(S3.copyObject).not.toBeCalled();
     expect(resp).toEqual(
       expect.objectContaining({
-        statusCode: 307,
+        statusCode: 301,
         headers: expect.objectContaining({ Location: '/thumbnails/32x18/image.jpg' }),
       })
     );
@@ -126,7 +126,7 @@ describe('generate', () => {
     expect(S3.copyObject).toBeCalledWith(expect.objectContaining({ Metadata: { width: '960', height: '540' } }));
     expect(resp).toEqual(
       expect.objectContaining({
-        statusCode: 307,
+        statusCode: 301,
         headers: expect.objectContaining({ Location: '/thumbnails/32x18/image.jpg' }),
       })
     );

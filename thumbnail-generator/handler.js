@@ -88,8 +88,8 @@ const generateThumbnail = async ({ width, height, location }) => {
   inputStream.pipe(transform).pipe(outputStream);
   return Promise.race([
     new Promise((resolve, reject) => {
-      inputStream.on('finish', () => resolve(thumbKey));
-      inputStream.on('close', () => resolve(thumbKey));
+      outputStream.on('finish', () => resolve(thumbKey));
+      outputStream.on('close', () => resolve(thumbKey));
     }),
     promise,
   ]);
@@ -108,15 +108,16 @@ const generate = async event => {
       const sourceDimension = await getSourceDimension(location);
       const { width: tWidth, height: tHeight } = getTargetDimension({ width, height, sourceDimension });
       return {
-        statusCode: 307,
+        statusCode: 301,
         headers: {
           Location: path.join(Prefix, `${tWidth}x${tHeight}`, location),
         },
       };
     }
     const key = await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
+    console.log('resolved');
     return {
-      statusCode: 302,
+      statusCode: 301,
       headers: {
         Location: path.join(Prefix, key),
       },
