@@ -30,7 +30,7 @@ Since there is no ssl certificate, you will need to ignore (by-pass) the certifi
 
 Minio s3 endpoint is `https://localhost/` or `http://localhost:9000`.
 
-Use key id and credential from the .env file
+Use key id and credential from the .env file to log into Minio
 
 ```
 AKIAMOCKACESSKEYIDZZ
