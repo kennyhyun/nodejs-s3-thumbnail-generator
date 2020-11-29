@@ -1,3 +1,4 @@
+'use strict';
 const probe = require('probe-image-size');
 const { s3Client, getMetadata } = require('./s3Client');
 
@@ -36,7 +37,7 @@ const getSourceDimension = async location => {
     } = obj;
     if (width && height) return { width: Number(width), height: Number(height) };
     const strm = s3Client
-      .getObject({ ...sourceS3Config, Key: location }, (err, data) => {
+      .getObject({ ...sourceS3Config, Key: location }, err => {
         if (err) {
           context.reject(err);
         }

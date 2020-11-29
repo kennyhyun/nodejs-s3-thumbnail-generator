@@ -1,26 +1,10 @@
 'use strict';
 const sharp = require('sharp');
 const path = require('path');
-const config = require('dotenv').config();
-const Stream = require('stream');
+require('dotenv');
 
 const { getTargetDimension, getSourceDimension } = require('./dimension');
-const { s3Client } = require('./s3Client');
-
-const {
-  SOURCE_BUCKET_NAME: SourceBucketName = 'images',
-  TARGET_BUCKET_NAME: TargetBucketName = 'thumbnails',
-  REGION: Region = 'ap-southeast-2',
-  S3_HOST,
-} = process.env;
-
-const sourceS3Config = {
-  Bucket: SourceBucketName,
-};
-
-const targetS3Config = {
-  Bucket: TargetBucketName,
-};
+const { createTargetBucket, getSourceStream, getTargetStream } = require('./s3Client');
 
 const hello = async event => {
   return {
@@ -36,39 +20,6 @@ const hello = async event => {
   };
   // Use this code if you don't use the http event with the LAMBDA-PROXY integration
   // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
-};
-
-const sourcePrefix = '/images';
-const getDimensionKey = ({ width, height }) => `${width || ''}x${height || ''}`;
-
-const getTargetStream = ({ context, width, height, location }) => {
-  const dimensionKey = getDimensionKey({ width, height });
-  const thumbKey = `${dimensionKey}/${location}`;
-  const stream = new Stream.PassThrough().on('error', err => context.reject(err));
-  return {
-    stream,
-    thumbKey,
-    promise: s3Client.upload({ ...targetS3Config, Key: thumbKey, Body: stream }).promise(),
-  };
-};
-
-const getSourceStream = ({ location, context }) =>
-  s3Client
-    .getObject({ ...sourceS3Config, Key: location }, (err, data) => {
-      if (err) {
-        context.reject(err);
-      }
-    })
-    .createReadStream()
-    .on('error', e => context.reject(e));
-
-const createTargetBucket = context => {
-  // create bucket async
-  s3Client.createBucket({ Bucket: TargetBucketName, CreateBucketConfiguration: { LocationConstraint: Region } }, e => {
-    if (e && e.code !== 'BucketAlreadyOwnedByYou') {
-      context.reject(new Error(`Failed to create the bucket: ${e.message}`));
-    }
-  });
 };
 
 const generateThumbnail = async ({ width, height, location }) => {
@@ -90,6 +41,8 @@ const generateThumbnail = async ({ width, height, location }) => {
     new Promise((resolve, reject) => {
       outputStream.on('finish', () => resolve(thumbKey));
       outputStream.on('close', () => resolve(thumbKey));
+      inputStream.on('error', e => reject(e));
+      outputStream.on('error', e => reject(e));
     }),
     promise,
   ]);
