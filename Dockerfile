@@ -1,4 +1,5 @@
 FROM node:14.15.0-alpine3.12 as builder
+RUN apk add python3 make g++
 
 ENV NODE_ENV=test
 
@@ -16,6 +17,6 @@ COPY --from=builder /app/node_modules node_modules
 
 COPY package.json /app/
 COPY serverless.yml /app/
-COPY thumbnail-generator/handler.js /app/thumbnail-generator/
+COPY thumbnail-generator/*.js /app/thumbnail-generator/
 
 CMD [ "yarn", "run", "serverless", "offline" ]
