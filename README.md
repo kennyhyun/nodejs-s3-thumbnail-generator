@@ -15,7 +15,7 @@ This is still in progress
 
 Check the dev console in action!
 
-https://user-images.githubusercontent.com/5399854/100533417-24bfea00-3258-11eb-85f7-c9b85288f507.png
+![network](https://user-images.githubusercontent.com/5399854/100533417-24bfea00-3258-11eb-85f7-c9b85288f507.png)
 
 ## Generator API
 
