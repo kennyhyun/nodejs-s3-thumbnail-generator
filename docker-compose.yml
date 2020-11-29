@@ -73,7 +73,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.serverless.loadbalancer.server.port=3000"
-      - "traefik.http.routers.serverless.rule=PathPrefix(`/generate`)"
+      - "traefik.http.routers.serverless.rule=PathPrefix(`/thumbnails/generate`)"
       - "traefik.http.routers.serverless.entrypoints=https"
       - "traefik.http.routers.serverless.tls=true"
       - "traefik.http.routers.serverless.service=serverless"

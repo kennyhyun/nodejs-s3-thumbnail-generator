@@ -73,7 +73,7 @@ functions:
 #    Check the event documentation for details
     events:
       - http:
-          path: generate/{proxy+}
+          path: thumbnails/generate/{proxy+}
           method: get
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
