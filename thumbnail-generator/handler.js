@@ -103,15 +103,24 @@ const generate = async event => {
       pathParameters: { proxy },
     } = event;
     const [, width, height, location] = proxy.match(/^([0-9]+)?x([0-9]+)?\/(.*)$/) || [];
-    if ((width || height) && location) {
-      const key = await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
+    if ((!width && !height) || !location) return { statusCode: 400 };
+    if (!(width && height)) {
+      const sourceDimension = await getSourceDimension(location);
+      const { width: tWidth, height: tHeight } = getTargetDimension({ width, height, sourceDimension });
       return {
-        statusCode: 302,
+        statusCode: 307,
         headers: {
-          Location: `${Prefix}/${key}`,
+          Location: path.join(Prefix, `${tWidth}x${tHeight}`, location),
         },
       };
     }
+    const key = await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
+    return {
+      statusCode: 302,
+      headers: {
+        Location: path.join(Prefix, key),
+      },
+    };
   } catch (e) {
     console.error(e);
     return {
@@ -119,13 +128,6 @@ const generate = async event => {
       body: JSON.stringify({ message: e.message }),
     };
   }
-  return {
-    statusCode: 400,
-    body: JSON.stringify({
-      message: 'Go Serverless v1.0! Your function executed successfully!',
-      input: event,
-    }),
-  };
 };
 
 Object.assign(module.exports, { generate, hello });
