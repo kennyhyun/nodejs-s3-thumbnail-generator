@@ -28,7 +28,7 @@ Since there is no ssl certificate, you will need to ignore (by-pass) the certifi
 - open `https://localhost/thumbnails/128x128/3wm604wp7qg21.jpg` to see the generated thumbnail
   - try other size like `https://localhost/thumbnails/x128/3wm604wp7qg21.jpg` as well
 
-Minio s3 endpoint is `https://localhost/`.
+Minio s3 endpoint is `https://localhost/` or `http://localhost:9000`.
 
 Use key id and credential from the .env file
 
@@ -71,6 +71,10 @@ Then you can access the bucket via http://minio:9000/ from your container.
   - use stream to download and upload the images
 - On the fly generation with the width and/or height provided
 - The generator Lambda can be customised and updated
+
+## traefik dashboard
+
+http:localhost:8081
 
 ## TODOs
 
