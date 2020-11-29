@@ -25,7 +25,7 @@ const getTargetDimension = ({ sourceDimension: dimension, width, height }) => {
   return { height, width: calcWidth({ dimension, height }) };
 };
 
-const getSourceDimension = async location => {
+const querySourceDimension = async location => {
   try {
     const context = {};
     const promise = new Promise((resolve, reject) => {
@@ -56,6 +56,6 @@ const getSourceDimension = async location => {
 };
 
 Object.assign(module.exports, {
-  getSourceDimension,
+  querySourceDimension,
   getTargetDimension,
 });

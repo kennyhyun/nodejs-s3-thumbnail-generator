@@ -3,7 +3,7 @@ const sharp = require('sharp');
 const path = require('path');
 require('dotenv');
 
-const { getTargetDimension, getSourceDimension } = require('./dimension');
+const { getTargetDimension, querySourceDimension } = require('./dimension');
 const { createTargetBucket, getSourceStream, getTargetStream } = require('./s3Client');
 
 const hello = async event => {
@@ -27,7 +27,7 @@ const generateThumbnail = async ({ width, height, location }) => {
   const promise = new Promise((resolve, reject) => {
     context.reject = reject;
   });
-  const sourceDimension = await getSourceDimension(location);
+  const sourceDimension = await querySourceDimension(location);
   const targetDimension = width && height ? { width, height } : getTargetDimension({ width, height, sourceDimension });
   createTargetBucket(context);
   const inputStream = getSourceStream({ context, location });
@@ -58,7 +58,7 @@ const generate = async event => {
     const [, width, height, location] = proxy.match(/^([0-9]+)?x([0-9]+)?\/(.*)$/) || [];
     if ((!width && !height) || !location) return { statusCode: 400 };
     if (!(width && height)) {
-      const sourceDimension = await getSourceDimension(location);
+      const sourceDimension = await querySourceDimension(location);
       const { width: tWidth, height: tHeight } = getTargetDimension({ width, height, sourceDimension });
       return {
         statusCode: 301,
