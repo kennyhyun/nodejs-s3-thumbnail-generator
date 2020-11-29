@@ -29,7 +29,7 @@ https://user-images.githubusercontent.com/5399854/100533417-24bfea00-3258-11eb-8
 - Dev env
   - [x] docker-compose with traefik
   - [x] minio
-  - [ ] nginx with 307 redirect
+  - [x] nginx with 307 redirect
   - [x] serverless offline generator in docker
     - `${width}x${height}`
     - `x${height}`
