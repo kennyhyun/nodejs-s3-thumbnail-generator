@@ -1,0 +1,33 @@
+{
+  "name": "nodejs-s3-thumbnail-generator",
+  "version": "1.0.0",
+  "description": "A CDN solution using AWS S3 and Lambda",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kennyhyun/nodejs-s3-thumbnail-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kennyhyun/nodejs-s3-thumbnail-generator/issues"
+  },
+  "homepage": "https://github.com/kennyhyun/nodejs-s3-thumbnail-generator#readme",
+  "devDependencies": {
+    "@babel/core": "^7.12.7",
+    "@babel/preset-env": "^7.12.7",
+    "jest": "^26.6.3",
+    "nodemon": "^2.0.6",
+    "serverless": "^2.11.1",
+    "serverless-offline": "^6.8.0"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.797.0",
+    "probe-image-size": "^6.0.0",
+    "sharp": "^0.26.3"
+  }
+}

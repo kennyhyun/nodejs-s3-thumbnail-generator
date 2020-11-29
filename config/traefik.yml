@@ -1,0 +1,31 @@
+api:
+  dashboard: true
+  insecure: true
+  debug: true
+  
+defaultEntryPoints:
+  - https
+
+entryPoints:
+  http:
+    address: :80
+  https:
+    address: :443
+
+tls:
+  certificates:
+    - certFile: /opt/certs/certificate.crt
+      keyFile: /opt/certs/private.key
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /opt/certs/certificate.crt
+        keyFile: /opt/certs/private.key
+
+providers:
+  file:
+    filename: /etc/traefik/traefik.yml
+    watch: true
+  docker:
+    network: traefik
+    exposedByDefault: false

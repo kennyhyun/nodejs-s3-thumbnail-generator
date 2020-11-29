@@ -1,0 +1,94 @@
+version: '3.5'
+
+services:
+  reverse-proxy:
+    image: traefik:v2.2
+    ports:
+      - 443:443
+      - 8081:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${PWD}/config/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ${PWD}/config/certs:/opt/certs
+    labels:
+      - "traefik.enable=true"
+    restart: unless-stopped
+    networks:
+      - traefik
+
+  minio:
+    image: minio/minio
+    environment:
+      - MINIO_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+      - MINIO_SECRET_KEY=${AWS_SECRET_ACCESS_KEY}
+      - MINIO_REGION_NAME=${AWS_DEFAULT_REGION}
+    expose:
+      - 9000
+    ports:
+      - 9000:9000
+    volumes:
+      - ./bucket:/data
+    command:
+      - server
+      - /data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.minio-admin.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio.rule=PathPrefix(`/minio`) || PathPrefix(`/images`)"
+      - "traefik.http.routers.minio.entrypoints=https"
+      - "traefik.http.routers.minio.tls=true"
+      - "traefik.http.routers.minio.service=minio-admin"
+    networks:
+      - traefik
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - type: bind
+        source: ./config/nginx.conf
+        target: /etc/nginx/nginx.conf
+      - ./bucket:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.static.loadbalancer.server.port=80"
+      - "traefik.http.routers.static.rule=PathPrefix(`/thumbnails`)"
+      - "traefik.http.routers.static.entrypoints=https"
+      - "traefik.http.routers.static.tls=true"
+      - "traefik.http.routers.static.service=static"
+    depends_on:
+      - reverse-proxy
+    networks:
+      - traefik
+
+  serverless:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    expose:
+      - 3000
+    volumes:
+      - ./thumbnail-generator/handler.js:/app/thumbnail-generator/handler.js
+      - ./serverless.yml:/app/serverless.yml
+      - .env.docker:/app/.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.serverless.loadbalancer.server.port=3000"
+      - "traefik.http.routers.serverless.rule=PathPrefix(`/thumbnails/generate`)"
+      - "traefik.http.routers.serverless.entrypoints=https"
+      - "traefik.http.routers.serverless.tls=true"
+      - "traefik.http.routers.serverless.service=serverless"
+    command:
+      - yarn
+      - run
+      - nodemon
+      - node_modules/.bin/serverless
+      - offline
+    depends_on:
+      - reverse-proxy
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    driver: bridge
+    name: traefik
