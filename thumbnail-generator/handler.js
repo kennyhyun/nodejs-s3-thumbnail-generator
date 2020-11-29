@@ -68,7 +68,6 @@ const generate = async event => {
       };
     }
     const key = await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
-    console.log('resolved');
     return {
       statusCode: 301,
       headers: {
