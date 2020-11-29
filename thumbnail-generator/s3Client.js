@@ -2,6 +2,7 @@
 const Stream = require('stream');
 const AWS = require('aws-sdk');
 
+console.log('------------------', process.env);
 const {
   SOURCE_BUCKET_NAME: SourceBucketName = 'images',
   TARGET_BUCKET_NAME: TargetBucketName = 'thumbnails',

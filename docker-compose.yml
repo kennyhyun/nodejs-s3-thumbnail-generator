@@ -70,7 +70,10 @@ services:
     volumes:
       - ./thumbnail-generator/handler.js:/app/thumbnail-generator/handler.js
       - ./serverless.yml:/app/serverless.yml
-      - .env.docker:/app/.env
+      - type: bind
+        source: .env
+        target: /app/.env
+        read_only: true
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.serverless.loadbalancer.server.port=3000"

@@ -1,7 +1,7 @@
 'use strict';
+require('dotenv').config();
 const sharp = require('sharp');
 const path = require('path');
-require('dotenv');
 
 const { getTargetDimension, querySourceDimension } = require('./dimension');
 const { createTargetBucket, getSourceStream, getTargetStream } = require('./s3Client');
