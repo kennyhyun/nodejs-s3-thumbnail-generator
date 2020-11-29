@@ -17,6 +17,35 @@ Check the dev console in action!
 
 ![network](https://user-images.githubusercontent.com/5399854/100533417-24bfea00-3258-11eb-85f7-c9b85288f507.png)
 
+## Starting local development environment with docker-compose
+
+Since there is no ssl certificate, you will need to ignore (by-pass) the certificate error. (Click Advanced and Proceed to ...)
+
+- copy .env.sample to .env
+- run `docker-compose up -d`
+- open `https://localhost/minio/images/`
+  - upload image files if you want
+- open `https://localhost/thumbnails/128x128/3wm604wp7qg21.jpg` to see the generated thumbnail
+  - try other size like `https://localhost/thumbnails/x128/3wm604wp7qg21.jpg` as well
+
+Minio s3 endpoint is `https://localhost/`.
+
+### Using docker-compose
+
+If you want to use the s3 endpoint to your docker-compose project, use docker network.
+
+```
+your-service:
+  ...
+  network: traefik
+networks:
+  traefik:
+    external:
+      name: traefik
+```
+
+Then you can access the bucket via http://minio:9000/ from your container.
+
 ## Generator API
 
 - Use Sharp library
