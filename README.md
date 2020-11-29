@@ -30,6 +30,25 @@ Since there is no ssl certificate, you will need to ignore (by-pass) the certifi
 
 Minio s3 endpoint is `https://localhost/`.
 
+Use key id and credential from the .env file
+
+```
+AKIAMOCKACESSKEYIDZZ
+mock+AWS+SECRETaccessKEY+mock+access+KEY
+```
+from the sample
+
+### make the Minio bucket public
+
+![image](https://user-images.githubusercontent.com/5399854/100536479-fb618700-3274-11eb-9616-496740bcdd69.png)
+
+From the three dots icon beside the bucket, click Edit policy and click add button.
+
+![image](https://user-images.githubusercontent.com/5399854/100537258-ef78c380-327a-11eb-9850-7da190467fba.png)
+
+and then try https://localhost/images/3wm604wp7qg21.jpg
+
+
 ### Using docker-compose
 
 If you want to use the s3 endpoint to your docker-compose project, use docker network.
