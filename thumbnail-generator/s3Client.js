@@ -11,9 +11,15 @@ const s3Client = new AWS.S3({ endpoint: S3_HOST, s3ForcePathStyle: true });
 
 const getS3Client = () => s3Client;
 
+const getMetadata = obj =>
+  Object.keys(obj).reduce((prev, key) => {
+    return { ...prev, [key]: `${obj[key]}` };
+  }, {});
+
 Object.assign(module.exports, {
   getS3Client,
   get s3Client() {
     return getS3Client();
   },
+  getMetadata,
 });

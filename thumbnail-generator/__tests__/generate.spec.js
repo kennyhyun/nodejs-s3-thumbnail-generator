@@ -1,40 +1,61 @@
-const mockS3 = () => {
+const S3 = {
+  upload: jest.fn().mockImplementation(({ Body }) => {
+    setTimeout(() => Body.emit('close'), 100);
+    return {
+      promise: jest.fn().mockResolvedValue(),
+    };
+  }),
+  headObject: jest.fn().mockImplementation(() => ({
+    promise: jest.fn().mockResolvedValue({
+      AcceptRanges: 'bytes',
+      LastModified: new Date('2020-11-15T12:28:49.000Z'),
+      ContentLength: 84995,
+      ETag: '"00000000000000000000000000000000-1"',
+      ContentType: 'image/jpeg',
+      Metadata: { width: '960', height: '540' },
+    }),
+  })),
+  getObject: jest.fn().mockImplementation(() => ({
+    createReadStream: jest.fn().mockImplementation(() => {
+      const stream = {
+        on: jest.fn(),
+        pipe: jest.fn(),
+      };
+      stream.on.mockImplementation((method, cb) => {
+        if (method === 'finish') setTimeout(cb, 1000);
+        return stream;
+      });
+      stream.pipe.mockReturnValue(stream);
+      return stream;
+    }),
+  })),
+  createBucket: jest.fn(),
+  copyObject: jest.fn().mockImplementation(() => ({
+    promise: jest.fn().mockResolvedValue(),
+  })),
+};
+
+const mockS3 = ({ return: { headObject } = {} } = {}) => {
   jest.doMock('aws-sdk', () => ({
     S3: jest.fn().mockImplementation(() => ({
-      upload: jest.fn().mockImplementation(({ Body }) => {
-        setTimeout(() => Body.emit('close'), 100);
-        return {
-          promise: jest.fn().mockResolvedValue(),
-        };
-      }),
-      headObject: jest.fn().mockImplementation(() => ({
-        promise: jest.fn().mockResolvedValue({
-          AcceptRanges: 'bytes',
-          LastModified: new Date('2020-11-15T12:28:49.000Z'),
-          ContentLength: 84995,
-          ETag: '"00000000000000000000000000000000-1"',
-          ContentType: 'image/jpeg',
-          Metadata: { width: '960', height: '540' },
-        }),
-      })),
-      getObject: jest.fn().mockImplementation(() => ({
-        createReadStream: jest.fn().mockImplementation(() => {
-          const stream = {
-            on: jest.fn(),
-            pipe: jest.fn(),
-          };
-          stream.on.mockImplementation((method, cb) => {
-            if (method === 'finish') setTimeout(cb, 1000);
-            return stream;
-          });
-          stream.pipe.mockReturnValue(stream);
-          return stream;
-        }),
-      })),
-      createBucket: jest.fn(),
+      ...S3,
+      ...(headObject
+        ? {
+            headObject: jest.fn().mockImplementation(() => ({
+              promise: jest.fn().mockResolvedValue(headObject),
+            })),
+          }
+        : {}),
     })),
   }));
 };
+
+jest.doMock('probe-image-size', () =>
+  jest.fn().mockResolvedValue({
+    width: 960,
+    height: 540,
+  })
+);
 
 const event = proxy => ({
   pathParameters: { proxy },
@@ -82,6 +103,27 @@ describe('generate', () => {
     const { generate } = await import('../handler');
     const resp = await generate(event('32x/image.jpg'));
     console.log(resp);
+    expect(S3.copyObject).not.toBeCalled();
+    expect(resp).toEqual(
+      expect.objectContaining({
+        statusCode: 302,
+        headers: expect.objectContaining({ Location: '/thumbnails/32x18/image.jpg' }),
+      })
+    );
+  });
+  it('should update metadata when there is no metadata in the source', async () => {
+    mockS3({
+      return: {
+        headObject: {
+          Metadata: {},
+        },
+      },
+    });
+    const aws = await import('aws-sdk');
+    const { generate } = await import('../handler');
+    const resp = await generate(event('32x/image.jpg'));
+    console.log(resp);
+    expect(S3.copyObject).toBeCalledWith(expect.objectContaining({ Metadata: { width: '960', height: '540' } }));
     expect(resp).toEqual(
       expect.objectContaining({
         statusCode: 302,

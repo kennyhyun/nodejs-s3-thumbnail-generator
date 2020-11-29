@@ -1,9 +1,7 @@
 const probe = require('probe-image-size');
-const { s3Client } = require('./s3Client');
+const { s3Client, getMetadata } = require('./s3Client');
 
-const {
-  SOURCE_BUCKET_NAME: SourceBucketName = 'images',
-} = process.env;
+const { SOURCE_BUCKET_NAME: SourceBucketName = 'images' } = process.env;
 
 const sourceS3Config = {
   Bucket: SourceBucketName,
@@ -46,7 +44,18 @@ const getSourceDimension = async location => {
       .createReadStream()
       .on('error', e => context.reject(e));
     const info = await Promise.race([probe(strm), promise]).catch(() => ({}));
-    // TODO: update meta asyncronously
+    s3Client
+      .copyObject({
+        ...sourceS3Config,
+        Key: location,
+        CopySource: `${SourceBucketName}/${location}`,
+        Metadata: getMetadata(info),
+        MetadataDirective: 'REPLACE',
+      })
+      .promise()
+      .catch(e => {
+        console.error(e);
+      });
     return info;
   } catch (e) {
     console.log('Error:', e.message);
