@@ -2,9 +2,9 @@
 
 A CDN solution using AWS S3 and Lambda
 
-![prod system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/main/AWS%20thumnail%20CDN%20solution%20-%20aws%20infra%20for%20thumbnails.svg)
+![prod system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/devenv/AWS%20thumbnail%20CDN%20solution%20-%20aws%20infra%20for%20thumbnails.svg)
 
-![dev system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/main/nginx%20front%20for%20thumbnails%20-%20test%20env%20for%20aws.svg)
+![dev system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/devenv/AWS%20thumbnail%20CDN%20solution%20-%20dev%20env%20for%20aws.svg)
 
 This is still in progress
 
@@ -23,10 +23,10 @@ This is still in progress
 ## TODOs
 
 - Dev env
-  - [ ] docker-compose with traefik
-  - [ ] minio
+  - [x] docker-compose with traefik
+  - [x] minio
   - [ ] nginx with 307 redirect
-  - [ ] serverless offline generator in docker
+  - [x] serverless offline generator in docker
     - `${width}x${height}`
     - `x${height}`
     - `${width}x`
