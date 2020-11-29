@@ -38,7 +38,7 @@ mock+AWS+SECRETaccessKEY+mock+access+KEY
 ```
 from the sample
 
-### make the Minio bucket public
+### Make the Minio bucket public
 
 ![image](https://user-images.githubusercontent.com/5399854/100536479-fb618700-3274-11eb-9616-496740bcdd69.png)
 
@@ -72,7 +72,7 @@ Then you can access the bucket via http://minio:9000/ from your container.
 - On the fly generation with the width and/or height provided
 - The generator Lambda can be customised and updated
 
-## traefik dashboard
+## Traefik dashboard
 
 http://localhost:8081
 
