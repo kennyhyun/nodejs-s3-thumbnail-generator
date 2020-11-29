@@ -2,16 +2,20 @@
 
 A CDN solution using AWS S3 and Lambda
 
-![prod system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/devenv/AWS%20thumbnail%20CDN%20solution%20-%20aws%20infra%20for%20thumbnails.svg)
+![prod system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/main/AWS%20thumbnail%20CDN%20solution%20-%20aws%20infra%20for%20thumbnails.svg)
 
-![dev system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/devenv/AWS%20thumbnail%20CDN%20solution%20-%20dev%20env%20for%20aws.svg)
+![dev system](https://raw.githubusercontent.com/kennyhyun/nodejs-s3-thumbnail-generator/main/AWS%20thumbnail%20CDN%20solution%20-%20dev%20env%20for%20aws.svg)
 
 This is still in progress
 
 ## Goal
 
 - [ ] Provide Prod solution via Amazon Marketplace
-- [ ] Provide Dev environment same as prod environment (from the view point of frontend and thumbnail generator)
+- [x] Provide Dev environment same as prod environment (from the view point of frontend and thumbnail generator)
+
+Check the dev console in action!
+
+https://user-images.githubusercontent.com/5399854/100533417-24bfea00-3258-11eb-85f7-c9b85288f507.png
 
 ## Generator API
 
