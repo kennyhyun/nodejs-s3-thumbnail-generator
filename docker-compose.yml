@@ -68,6 +68,7 @@ services:
     image: kennyhyun/nodejs-s3-thumbnail-generator
     expose:
       - 3000
+    restart: unless-stopped
     volumes:
       - ./thumbnail-generator/handler.js:/app/thumbnail-generator/handler.js
       - ./serverless.yml:/app/serverless.yml
@@ -82,12 +83,6 @@ services:
       - "traefik.http.routers.serverless.entrypoints=https"
       - "traefik.http.routers.serverless.tls=true"
       - "traefik.http.routers.serverless.service=serverless"
-    command:
-      - yarn
-      - run
-      - nodemon
-      - node_modules/.bin/serverless
-      - offline
     depends_on:
       - reverse-proxy
     networks:
