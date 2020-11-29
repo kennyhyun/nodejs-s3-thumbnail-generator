@@ -74,7 +74,7 @@ Then you can access the bucket via http://minio:9000/ from your container.
 
 ## traefik dashboard
 
-http:localhost:8081
+http://localhost:8081
 
 ## TODOs
 
