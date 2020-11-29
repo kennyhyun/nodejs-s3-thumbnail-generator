@@ -59,6 +59,17 @@ const createTargetBucket = context => {
   });
 };
 
+const updateMetadata = ({ Bucket, Metadata, Key, ...options }) =>
+  s3Client
+    .copyObject({
+      ...options,
+      Key,
+      Metadata,
+      CopySource: `${Bucket}/${Key}`,
+      MetadataDirective: 'REPLACE',
+    })
+    .promise();
+
 Object.assign(module.exports, {
   getS3Client,
   get s3Client() {
@@ -68,4 +79,5 @@ Object.assign(module.exports, {
   createTargetBucket,
   getTargetStream,
   getSourceStream,
+  updateMetadata,
 });
