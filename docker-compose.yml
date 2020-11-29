@@ -64,6 +64,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: kennyhyun/nodejs-s3-thumbnail-generator
     expose:
       - 3000
     volumes:
