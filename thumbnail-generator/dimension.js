@@ -45,9 +45,10 @@ const querySourceDimension = async location => {
       .createReadStream()
       .on('error', e => context.reject(e));
     const info = await Promise.race([probe(strm), promise]).catch(() => ({}));
-    updateMetadata({ ...sourceS3Config, Metadata: getMetadata(info), Key: location }).catch(e => {
-      console.error(e);
-    });
+    updateMetadata({ options: { ...sourceS3Config, Key: location }, Metadata: getMetadata(info), headObject: obj })
+      .catch(e => {
+        console.error(e);
+      });
     return info;
   } catch (e) {
     console.log('Error:', e.message);
