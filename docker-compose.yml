@@ -34,7 +34,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.minio-admin.loadbalancer.server.port=9000"
-      - "traefik.http.routers.minio.rule=PathPrefix(`/minio`) || PathPrefix(`/images`)"
+      - "traefik.http.routers.minio.rule=PathPrefix(`/minio`) || PathPrefix(`/images`) || Host(`localhost`)"
       - "traefik.http.routers.minio.entrypoints=https"
       - "traefik.http.routers.minio.tls=true"
       - "traefik.http.routers.minio.service=minio-admin"
