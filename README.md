@@ -23,9 +23,9 @@ Since there is no ssl certificate, you will need to ignore (by-pass) the certifi
 
 - copy .env.sample to .env
 - run `docker-compose up -d`
-- open `https://localhost/minio/images/`
+- open https://localhost/minio/images/
   - upload image files if you want
-- open `https://localhost/thumbnails/128x128/3wm604wp7qg21.jpg` to see the generated thumbnail
+- open https://localhost/thumbnails/128x128/3wm604wp7qg21.jpg to see the generated thumbnail
   - try other size like `https://localhost/thumbnails/x128/3wm604wp7qg21.jpg` as well
 
 Minio s3 endpoint is `https://localhost/` or `http://localhost:9000`.
