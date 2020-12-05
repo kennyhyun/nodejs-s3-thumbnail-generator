@@ -20,15 +20,17 @@ service: thumbnail-generator
 # Check out our docs for more details
 frameworkVersion: '2'
 
+plugins:
+  - serverless-offline
+
 provider:
   name: aws
   runtime: nodejs12.x
+  stage: ${opt:stage,"local"}
 
 # you can overwrite defaults here
 #  stage: dev
 #  region: us-east-1
-plugins:
-  - serverless-offline
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -49,6 +51,8 @@ plugins:
 # you can define service wide environment variables here
 #  environment:
 #    variable1: value1
+  environment:
+    STAGE: ${self:provider.stage}
 
 # you can add packaging information here
 #package:
