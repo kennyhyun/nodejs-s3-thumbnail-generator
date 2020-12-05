@@ -132,3 +132,75 @@ describe('generate', () => {
     );
   });
 });
+
+describe('generating for bigger dimensions', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+  it('should not calculate larger than original size when width only', async () => {
+    mockS3();
+    const { generate } = await import('../handler');
+    const resp = await generate(event('3200x/image.jpg'));
+    console.log(resp);
+    expect(S3.copyObject).not.toBeCalled();
+    expect(resp).toEqual(
+      expect.objectContaining({
+        statusCode: 301,
+        headers: expect.objectContaining({ Location: '/thumbnails/960x540/image.jpg' }),
+      })
+    );
+  });
+  it('should not calculate larger than original size when height only', async () => {
+    mockS3();
+    const { generate } = await import('../handler');
+    const resp = await generate(event('x1400/image.jpg'));
+    console.log(resp);
+    expect(S3.copyObject).not.toBeCalled();
+    expect(resp).toEqual(
+      expect.objectContaining({
+        statusCode: 301,
+        headers: expect.objectContaining({ Location: '/thumbnails/960x540/image.jpg' }),
+      })
+    );
+  });
+  it('should not calculate larger than original size but keep requested ratio', async () => {
+    mockS3();
+    const { generate } = await import('../handler');
+    const resp = await generate(event('1024x768/image.jpg'));
+    console.log(resp);
+    expect(S3.copyObject).not.toBeCalled();
+    expect(resp).toEqual(
+      expect.objectContaining({
+        statusCode: 301,
+        headers: expect.objectContaining({ Location: '/thumbnails/720x540/image.jpg' }),
+      })
+    );
+  });
+  it('should not calculate larger than original size but keep requested ratio -- width only bigger', async () => {
+    mockS3();
+    const { generate } = await import('../handler');
+    const resp = await generate(event('1024x480/image.jpg'));
+    console.log(resp);
+    expect(S3.copyObject).not.toBeCalled();
+    expect(resp).toEqual(
+      expect.objectContaining({
+        statusCode: 301,
+        headers: expect.objectContaining({ Location: '/thumbnails/960x450/image.jpg' }),
+      })
+    );
+  });
+  it('should not calculate larger than original size but keep requested ratio -- height only bigger', async () => {
+    mockS3();
+    const { generate } = await import('../handler');
+    const resp = await generate(event('860x860/image.jpg'));
+    console.log(resp);
+    expect(S3.copyObject).not.toBeCalled();
+    expect(resp).toEqual(
+      expect.objectContaining({
+        statusCode: 301,
+        headers: expect.objectContaining({ Location: '/thumbnails/540x540/image.jpg' }),
+      })
+    );
+  });
+
+});

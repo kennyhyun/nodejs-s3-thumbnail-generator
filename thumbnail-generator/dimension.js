@@ -9,8 +9,17 @@ const sourceS3Config = {
 };
 
 const floor = f => Math.floor(f.toPrecision(15));
+
 const calcHeight = ({ dimension: { width: w, height: h }, width }) => floor((width * h) / w);
 const calcWidth = ({ dimension: { width: w, height: h }, height }) => floor((height * w) / h);
+
+const getMaximumWithRatio = (dimension, ratio) => {
+  const sourceRatio = dimension.width / dimension.height;
+  if (sourceRatio > ratio) {
+    return { height: dimension.height, width: floor(ratio * dimension.height) };
+  }
+  return { height: floor(dimension.width / ratio), width: dimension.width };
+};
 
 const getTargetDimension = ({ sourceDimension: dimension, width, height }) => {
   if (!(dimension.width && dimension.height)) {
@@ -18,11 +27,17 @@ const getTargetDimension = ({ sourceDimension: dimension, width, height }) => {
     return { width: width || height, height: height || width };
   }
   if (width && height) {
-    return { width, height };
+    if (dimension.width >= width && dimension.height >= height) {
+      return { width, height };
+    }
+    const ratio = width / height;
+    return getMaximumWithRatio(dimension, ratio);
   } else if (width) {
-    return { width, height: calcHeight({ dimension, width }) };
+    if (dimension.width >= width) return { width, height: calcHeight({ dimension, width }) };
+    return { ...dimension };
   }
-  return { height, width: calcWidth({ dimension, height }) };
+  if (dimension.height >= height) return { height, width: calcWidth({ dimension, height }) };
+  return { ...dimension };
 };
 
 const querySourceDimension = async location => {

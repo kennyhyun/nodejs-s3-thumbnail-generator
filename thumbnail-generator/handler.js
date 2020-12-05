@@ -65,17 +65,16 @@ const generate = async event => {
       pathParameters: { proxy },
     } = event;
     const [, width, height, location] = proxy.match(/^([0-9]+)?x([0-9]+)?\/(.*)$/) || [];
-    if ((!width && !height) || !location) return { statusCode: 400 };
-    if (!(width && height)) {
-      const sourceDimension = await querySourceDimension(location);
-      const { width: tWidth, height: tHeight } = getTargetDimension({ width, height, sourceDimension });
+    if (!(location && (width || height))) return { statusCode: 400 };
+    const sourceDimension = await querySourceDimension(location);
+    const { width: tWidth, height: tHeight } = getTargetDimension({ width, height, sourceDimension });
+    if (tWidth !== width || tHeight !== height)
       return {
         statusCode: 301,
         headers: {
           Location: path.join(Prefix, `${tWidth}x${tHeight}`, location),
         },
       };
-    }
     const key = await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
     return {
       statusCode: 301,
