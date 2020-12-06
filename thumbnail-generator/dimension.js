@@ -52,6 +52,7 @@ const querySourceDimension = async location => {
       .catch(() => ({}));
     const { Metadata: { width, height } = {} } = obj;
     if (width && height) return { width: Number(width), height: Number(height) };
+    // get the meatadata
     const strm = s3Client
       .getObject({ ...sourceS3Config, Key: location }, err => {
         if (err) {

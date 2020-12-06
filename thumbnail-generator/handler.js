@@ -31,30 +31,42 @@ const hello = async event => {
   // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
 };
 
-const generateThumbnail = async ({ width, height, location }) => {
+const generateThumbnail = async ({ sourceDimension, width, height, location }) => {
   const context = {};
   const promise = new Promise((resolve, reject) => {
     context.reject = reject;
   });
-  const sourceDimension = await querySourceDimension(location);
   const targetDimension = width && height ? { width, height } : getTargetDimension({ width, height, sourceDimension });
   createTargetBucket(context);
-  const inputStream = getSourceStream({ context, location });
   const transform = sharp()
     .rotate()
     .resize(targetDimension)
     .jpeg({ quality: 80 });
-  const { thumbKey, stream: outputStream } = getTargetStream({ context, ...targetDimension, location });
-  inputStream.pipe(transform).pipe(outputStream);
-  return Promise.race([
-    new Promise((resolve, reject) => {
-      outputStream.on('finish', () => resolve(thumbKey));
-      outputStream.on('close', () => resolve(thumbKey));
-      inputStream.on('error', e => reject(e));
-      outputStream.on('error', e => reject(e));
-    }),
-    promise,
-  ]);
+
+  const returnKey = await Array(3)
+    .fill()
+    .reduce(async (success, _, retryCount) => {
+      const ret = await success.catch(e => {
+        console.warn('Resize Error:', e.message, 'Retrying', retryCount);
+        return null;
+      });
+      if (ret) return ret;
+      const inputStream = getSourceStream({ context, location });
+      const { thumbKey, stream: outputStream } = getTargetStream({ context, ...targetDimension, location });
+      const converterStream = inputStream.pipe(transform);
+      converterStream.pipe(outputStream);
+      return Promise.race([
+        new Promise((resolve, reject) => {
+          outputStream.on('finish', () => resolve(thumbKey));
+          outputStream.on('close', () => resolve(thumbKey));
+          inputStream.on('error', e => reject(e));
+          outputStream.on('error', e => reject(e));
+          converterStream.on('error', e => reject(e));
+        }),
+        promise,
+      ]);
+    }, Promise.resolve());
+  return returnKey;
 };
 
 const Prefix = '/thumbnails';
@@ -75,7 +87,12 @@ const generate = async event => {
           Location: path.join(Prefix, `${tWidth}x${tHeight}`, location),
         },
       };
-    const key = await generateThumbnail({ width: width && Number(width), height: height && Number(height), location });
+    const key = await generateThumbnail({
+      sourceDimension,
+      width: width && Number(width),
+      height: height && Number(height),
+      location,
+    });
     return {
       statusCode: 301,
       headers: {

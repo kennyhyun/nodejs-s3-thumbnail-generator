@@ -35,7 +35,7 @@ const S3 = {
   })),
 };
 
-const mockS3 = ({ return: { headObject } = {} } = {}) => {
+const mockS3 = ({ returns: { headObject } = {} } = {}) => {
   jest.doMock('aws-sdk', () => ({
     S3: jest.fn().mockImplementation(() => ({
       ...S3,
@@ -113,7 +113,7 @@ describe('generate', () => {
   });
   it('should update metadata when there is no metadata in the source', async () => {
     mockS3({
-      return: {
+      returns: {
         headObject: {
           Metadata: {},
         },
