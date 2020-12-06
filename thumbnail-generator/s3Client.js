@@ -59,10 +59,11 @@ const createTargetBucket = context => {
   });
 };
 
-const updateMetadata = ({ options, headObject: { ContentType }, Metadata }) =>
+const updateMetadata = ({ options: { Key, ...options }, headObject: { ContentType }, Metadata }) =>
   s3Client
     .copyObject({
       ...options,
+      Key,
       ContentType: ContentType || Metadata.mime,
       Metadata,
       CopySource: `${options.Bucket}/${Key}`,

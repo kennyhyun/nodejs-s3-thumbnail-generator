@@ -142,7 +142,6 @@ describe('generating for bigger dimensions', () => {
     const { generate } = await import('../handler');
     const resp = await generate(event('3200x/image.jpg'));
     console.log(resp);
-    expect(S3.copyObject).not.toBeCalled();
     expect(resp).toEqual(
       expect.objectContaining({
         statusCode: 301,
@@ -155,7 +154,6 @@ describe('generating for bigger dimensions', () => {
     const { generate } = await import('../handler');
     const resp = await generate(event('x1400/image.jpg'));
     console.log(resp);
-    expect(S3.copyObject).not.toBeCalled();
     expect(resp).toEqual(
       expect.objectContaining({
         statusCode: 301,
@@ -168,7 +166,6 @@ describe('generating for bigger dimensions', () => {
     const { generate } = await import('../handler');
     const resp = await generate(event('1024x768/image.jpg'));
     console.log(resp);
-    expect(S3.copyObject).not.toBeCalled();
     expect(resp).toEqual(
       expect.objectContaining({
         statusCode: 301,
@@ -181,7 +178,6 @@ describe('generating for bigger dimensions', () => {
     const { generate } = await import('../handler');
     const resp = await generate(event('1024x480/image.jpg'));
     console.log(resp);
-    expect(S3.copyObject).not.toBeCalled();
     expect(resp).toEqual(
       expect.objectContaining({
         statusCode: 301,
@@ -194,7 +190,6 @@ describe('generating for bigger dimensions', () => {
     const { generate } = await import('../handler');
     const resp = await generate(event('860x860/image.jpg'));
     console.log(resp);
-    expect(S3.copyObject).not.toBeCalled();
     expect(resp).toEqual(
       expect.objectContaining({
         statusCode: 301,

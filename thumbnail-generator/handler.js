@@ -7,9 +7,9 @@ const { STAGE = '' } = process.env;
 const suffix = STAGE ? `.${STAGE}` : '';
 const { error: envError } = dotenv.config({ path: path.resolve(process.cwd(), `.env${suffix}`) });
 if (envError) {
-  console.warn('WARN: Trying to load .env due to', envError.message);
+  console.log('WARN: Trying to load .env due to', envError.message);
   const { error } = dotenv.config();
-  if (error) console.warn('WARN:', error.message);
+  if (error) console.log('WARN:', error.message);
 }
 
 const { getTargetDimension, querySourceDimension } = require('./dimension');
