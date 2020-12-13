@@ -4,6 +4,8 @@
   "description": "A CDN solution using AWS S3 and Lambda",
   "main": "index.js",
   "scripts": {
+    "start": "docker-compose up -d",
+    "stop": "docker-compose down -v",
     "test": "jest"
   },
   "repository": {

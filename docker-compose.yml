@@ -4,6 +4,7 @@ services:
   reverse-proxy:
     image: traefik:v2.2
     ports:
+      - 80:80
       - 443:443
       - 8081:8080
     volumes:
@@ -33,11 +34,13 @@ services:
       - /data
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.minio-admin.loadbalancer.server.port=9000"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.routers.minio-insecure.rule=PathPrefix(`/minio`) || PathPrefix(`/images`) || Host(`localhost`)"
+      - "traefik.http.routers.minio-insecure.entrypoints=http"
       - "traefik.http.routers.minio.rule=PathPrefix(`/minio`) || PathPrefix(`/images`) || Host(`localhost`)"
       - "traefik.http.routers.minio.entrypoints=https"
       - "traefik.http.routers.minio.tls=true"
-      - "traefik.http.routers.minio.service=minio-admin"
+      - "traefik.http.routers.minio.service=minio"
       - "traefik.http.routers.minio.priority=10"
     networks:
       - traefik
@@ -52,6 +55,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.static.loadbalancer.server.port=80"
+      - "traefik.http.routers.static-insecure.rule=PathPrefix(`/thumbnails`)"
+      - "traefik.http.routers.static-insecure.entrypoints=http"
       - "traefik.http.routers.static.rule=PathPrefix(`/thumbnails`)"
       - "traefik.http.routers.static.entrypoints=https"
       - "traefik.http.routers.static.tls=true"
@@ -79,6 +84,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.serverless.loadbalancer.server.port=3000"
+      - "traefik.http.routers.serverless-insecure.rule=PathPrefix(`/thumbnails/generate`)"
+      - "traefik.http.routers.serverless-insecure.entrypoints=http"
       - "traefik.http.routers.serverless.rule=PathPrefix(`/thumbnails/generate`)"
       - "traefik.http.routers.serverless.entrypoints=https"
       - "traefik.http.routers.serverless.tls=true"
