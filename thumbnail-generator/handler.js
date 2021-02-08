@@ -2,6 +2,7 @@
 const dotenv = require('dotenv');
 const sharp = require('sharp');
 const path = require('path');
+const axios = require('axios');
 
 const { STAGE = '' } = process.env;
 const suffix = STAGE ? `.${STAGE}` : '';
@@ -13,7 +14,14 @@ if (envError) {
 }
 
 const { getTargetDimension, querySourceDimension } = require('./dimension');
-const { createTargetBucket, getSourceStream, getTargetStream } = require('./s3Client');
+const {
+  headObject,
+  writeStreamToSourceBucket,
+  createTargetBucket,
+  getSourceStream,
+  getTargetStream,
+  headSourceObject,
+} = require('./s3Client');
 
 const hello = async event => {
   return {
@@ -70,6 +78,7 @@ const generateThumbnail = async ({ sourceDimension, width, height, location }) =
 };
 
 const Prefix = '/thumbnails';
+const DuplicatePrefix = '/images';
 
 const generate = async event => {
   try {
@@ -108,4 +117,38 @@ const generate = async event => {
   }
 };
 
-Object.assign(module.exports, { generate, hello });
+const duplicate = async event => {
+  try {
+    const {
+      pathParameters: { proxy },
+      queryStringParameters: { duplicate },
+    } = event;
+    if (duplicate) {
+      const head = await headSourceObject({ key: proxy }).catch(e => console.warn(e.message));
+      if (head && head.ContentLength) {
+        console.log('Skipping dupliate exising file', proxy, head.ContentLength);
+      } else {
+        const { data } = await axios({
+          method: 'get',
+          url: duplicate,
+          responseType: 'stream',
+        });
+        await writeStreamToSourceBucket({ stream: data, key: proxy, url: duplicate });
+      }
+    }
+    return {
+      statusCode: 301,
+      headers: {
+        Location: path.join(DuplicatePrefix, proxy),
+      },
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: e.message }),
+    };
+  }
+};
+
+Object.assign(module.exports, { generate, duplicate, hello });

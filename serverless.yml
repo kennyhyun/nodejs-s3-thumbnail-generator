@@ -70,6 +70,12 @@ custom:
     host: 0.0.0.0
 
 functions:
+  duplicate:
+    handler: thumbnail-generator/handler.duplicate
+    events:
+      - http:
+          path: images/{proxy+}
+          method: get
   generate:
     handler: thumbnail-generator/handler.generate
 #    The following are a few example events you can configure

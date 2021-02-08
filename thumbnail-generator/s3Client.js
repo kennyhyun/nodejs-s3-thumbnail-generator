@@ -71,6 +71,35 @@ const updateMetadata = ({ options: { Key, ...options }, headObject: { ContentTyp
     })
     .promise();
 
+const MIME_JPEG = 'image/jpeg';
+const MIME_PNG = 'image/png';
+const MimeMap = {
+  jpg: MIME_JPEG,
+  jpeg: MIME_JPEG,
+  png: MIME_PNG,
+};
+
+const getContentType = (filename = '') => {
+  const [ext = ''] = filename.split('.').slice(-1);
+  return MimeMap[ext.toLowerCase()] || 'image/jpeg';
+};
+
+const writeStreamToSourceBucket = ({ key, url, stream, contentType }) => {
+  const pass = new Stream.PassThrough();
+  const params = { Bucket: SourceBucketName, Key: key, Body: pass, ContentType: contentType || getContentType(key) };
+  const promise = new Promise((res, rej) => {
+    s3Client.upload(params, (err, data) => {
+      if (err) return rej(err);
+      return res(data);
+    });
+  });
+  stream.pipe(pass);
+  return promise;
+};
+
+const headSourceObject = ({ key, ...params }) =>
+  s3Client.headObject({ ...params, Key: key || params.Key, Bucket: SourceBucketName }).promise();
+
 Object.assign(module.exports, {
   getS3Client,
   get s3Client() {
@@ -81,4 +110,6 @@ Object.assign(module.exports, {
   getTargetStream,
   getSourceStream,
   updateMetadata,
+  writeStreamToSourceBucket,
+  headSourceObject,
 });
