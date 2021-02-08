@@ -72,6 +72,14 @@ Then you can access the bucket via http://minio:9000/ from your container.
 - On the fly generation with the width and/or height provided
 - The generator Lambda can be customised and updated
 
+## Duplicate external url
+
+`/images/any/external/file.jpg?duplicate=<url>` will download url and save to `images/any/external/file.jpg`
+
+only jpegs and pngs extensions are supported.
+
+Since this is mutating the source bucket, this endpoint should be authenticated (TODO)
+
 ## traefik dashboard
 
 http://localhost:8081
@@ -86,5 +94,7 @@ http://localhost:8081
     - `${width}x${height}`
     - `x${height}`
     - `${width}x`
+  - [x] duplicate external images
+  - [ ] authenticate duplication
 - Prod env
   - [ ] cloudformation

@@ -39,6 +39,21 @@ const hello = async event => {
   // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
 };
 
+const MIME_JPEG = 'image/jpeg';
+const MIME_PNG = 'image/png';
+const MimeMap = {
+  jpg: MIME_JPEG,
+  jpeg: MIME_JPEG,
+  png: MIME_PNG,
+};
+
+const getContentType = (filename = '') => {
+  const [ext = ''] = filename.split('.').slice(-1);
+  const type = MimeMap[ext.toLowerCase()];
+  if (!type) throw new Error(`Mime type for ${ext} was not found`);
+  return type;
+};
+
 const generateThumbnail = async ({ sourceDimension, width, height, location }) => {
   const context = {};
   const promise = new Promise((resolve, reject) => {
@@ -124,16 +139,23 @@ const duplicate = async event => {
       queryStringParameters: { duplicate },
     } = event;
     if (duplicate) {
-      const head = await headSourceObject({ key: proxy }).catch(e => console.warn(e.message));
-      if (head && head.ContentLength) {
-        console.log('Skipping dupliate exising file', proxy, head.ContentLength);
-      } else {
-        const { data } = await axios({
-          method: 'get',
-          url: duplicate,
-          responseType: 'stream',
-        });
-        await writeStreamToSourceBucket({ stream: data, key: proxy, url: duplicate });
+      try {
+        const contentType = getContentType(proxy);
+        const head = await headSourceObject({ key: proxy }).catch(() => {});
+        if (head && head.ContentLength) {
+          console.log('Skipping dupliate exising file', proxy, head.ContentLength);
+        } else {
+          const { data } = await axios({
+            method: 'get',
+            url: duplicate,
+            responseType: 'stream',
+          });
+          await writeStreamToSourceBucket({ stream: data, key: proxy, url: duplicate, contentType }).catch(
+            console.warn
+          );
+        }
+      } catch (e) {
+        console.warn(e.message);
       }
     }
     return {
